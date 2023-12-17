@@ -1,0 +1,457 @@
+1-Our Object is to fit the simple linear regression model as well as multiple linear regression model for the advertising data.
+Now fitting the SLR model-
+
+```{r}
+### Model
+#$$sales=\beta_0+\beta_1*TV+\epsilon$$
+### Hypothesis :-
+#$$H_0:\beta_1=0$$
+#$$H_1:\beta_1\neq0$$
+  
+M1=lm(sales~TV,data=Adv)
+summary(M1)
+#F value: Since our f_value=312 which is greater than f_calculated.So we reject null hypothesis.
+#That means atleast one beta_i is not zero.
+#From the summary function we can see the p-value(2.2e-16)<0.025 at 5% LOS. The variable TV highly significant to the model. Our estimated values of regression coefficients are (beta_0=7.032594),(beta_1=0.047537).
+#The value of R^2=0.62,indicates that 62% of variance in sales is explained by the fitted model. R^2 increases as we increase regressor variables increases in the model.
+##Model Adequacy
+resid1=M1$residuals
+sales=Adv$sales
+n=length(sales)
+MSe=sum(resid1^2)/(n-1)
+MSe
+#N
+RSE=sqrt(MSe)
+RSE
+#N
+plot(resid1)
+abline(h=mean(resid1)) 
+#This shows that most of residual lies near normal line
+#N
+Sres=scale(resid1)
+plot(Sres)
+abline(h=mean(Sres))
+#Coeff of determination
+resid1=M1$residuals
+SSE=sum(resid1^2)
+y=Adv$sales
+t=y-mean(y)
+TSS=sum(t^2)
+Rsq=1-SSE/TSS
+Rsq
+#Adjusted R^2
+k=1
+n=length(y)
+df1=(n-k-1)
+df2=(n-1)
+adjRsq=1-(SSE/df1)/(TSS/df2)
+adjRsq
+#Interval prediction
+predict(M1,data.frame(TV=c(10,20,300)),interval="confidence")
+#N
+predict(M1,data.frame(TV=c(10,20,300)),interval="prediction")
+#Calculation B0 and B1
+SSE=sum((M1$residuals)^2)
+TV=Adv$TV
+n=length(TV)
+MSe=SSE/(n-2)
+mean=mean(TV)
+SXX=sum((TV-mean)^2)
+vb1=MSe/SXX #For variance of Beta_1
+vb1
+#N
+sb1=sqrt(vb1)
+sb1
+#N
+vb0=MSe/n+(MSe/SXX)*mean^2 # For Variance of Beta_0
+vb0
+#N
+
+```
+
+2- Fitting MLR model.
+
+```{r}
+### Model
+#$$sales=\beta_0+\beta_1*radio+\epsilon$$
+#Hypothesis will be:-
+#$$H_0:\beta_i=0$$
+#$$H_1:\beta_i\neq0$$
+M2=lm(sales~TV+radio,data=Adv)
+summary(M2)
+#Since our F statistics is too large and the critical value of F is 3.041753 which is too smaller than F statistics. So we are unable to accept the null hypothesis.
+#Interpretation:-
+#After applying the lm function on the mlr model we observe that the P value of variable (radio) is highly significant to the model. The estimate of regression coefficient is (beta_0=2.9211),(beta_1=0.04575) and (beta_2=0.18799).
+#The value of R^2=0.8972 which mean 89% variability in sales explained by this model.
+#Model Adequacy
+resid2=M2$residuals
+MSE=sum(resid2^2)/(n-2)
+MSE
+#N
+RSe=sqrt(MSE)
+RSe
+#N
+plot(resid2)
+abline(h=mean(resid2))
+#N
+radio=Adv$radio
+sres=scale(resid2)
+plot(sres)
+abline(h=mean(sres))
+# Prediction Of Interval
+predict(M2,data.frame(TV=c(10,50,200),radio=c(20,30,300)),interval = "confidence")
+#N
+predict(M2,data.frame(TV=c(10,50,200),radio=c(20,30,300)),interval = "prediction")
+#R^2
+resid3=M2$residuals
+SSE=sum(resid3^2)
+y=Adv$sales
+t=y-mean(y)
+TSS=sum(t^2)
+Rsq=1-SSE/TSS
+Rsq
+#Adjusted R^2
+k=2
+n=length(y)
+df1=(n-k-1)
+df2=(n-1)
+adjRsq=1-(SSE/df1)/(TSS/df2)
+adjRsq
+# MLR model with all variable
+M3=lm(sales~TV+radio+newspaper,data=Adv)
+summary(M3)
+#F statistics= 570.3 Which is too large than F critical value. So we reject the null hypothesis.
+#Interpretation:
+#From the summary of model 3 we observe that the P value of variable newspaper is 0.86>0.025 That is not significant to the model. The estimated value of regressor variables are (beta_0=2.938889),(beta_1=0.045765),(beta_2=0.188530) and (beta_3=-0.001037).
+#It is clear from the variables estimated value of newspaper i.e -ve which means it reduces the sales.In such situations we will drop the newspaper variable from the data.
+#R^2=0.8972 i.e 89.72% variability in sales explained by this model.
+# Accuracy of model
+res=M3$residuals
+MSE=sum(res^2)/(n-3)
+RSE=sqrt(MSE)
+plot(res)
+abline(h=mean(res))
+#N
+sre=scale(res)
+plot(sre)
+abline(h=mean(sre))
+#Interpretation
+#From the plot we can observe that the most of observations lies near about the lines and this conclude that is normal.We have removed newspaper variable from the M3 model because it is not significant and M3 becomes equal to M2.
+#So, we can say that M2 is most accurate model among all the model.
+# Prediction of Interval
+predict(M3,data.frame(TV=c(10,20,300),radio=c(10,20,300),newspaper=c(10,20,300)),interval = "confidence")
+#N
+predict(M3,data.frame(TV=c(10,20,300),radio=c(10,20,300),newspaper=c(10,20,300)),interval = "prediction")
+#The prediction interval > Confidence interval
+```
+
+3- Hetroscedasticity
+
+```{r}
+library(lmtest)
+bptest(M3)
+#Interpretation:
+#From above test we analise that the p_value=0.1623 which implies that our sample is Homoscedastic.
+```
+
+4- Our object is to fir regression model with the dummy variable for the Wage1 data that is in WOOLDRIDGE package.
+
+```{r}
+library(wooldridge)
+data("wage1")
+names(wage1)
+```
+4.1
+Let we want check the wage of non white people with same education and experience.
+```{r}
+#$$wage=\beta_0+\beta_1*educ+\beta_2*exper+\beta_3*nonwhite+\epsilon$$
+#(0 for white and 1 for NonWhite)
+#White people Wage
+#$$wage=\beta_0+\beta_1*educ+\beta_2*exper+\epsilon$$
+#Non White Wage
+#$$wage=\beta_0+\beta_1*educ+\beta_2*exper+beta_3+\epsilon$$
+MD=lm(wage~educ+exper+nonwhite,data=wage1)
+summary(MD)
+#Model for wage of white people will be given by:-
+#$$wage=-3.38683+0.64412*educ+0.07009*exper$$
+#Model for wage of nonwhite people will be given by:-
+#$$wage=-3.38683+0.64412*educ+0.07009*exper-0.01621$$
+#$$wage=-3.40303+0.64412*educ+0.07009*exper$$
+#It is clear from above summary that the estimate of nonwhite regressor is of negative sign and not significant to the model.So, we can say that the wage of nonwhite is less than white people.
+```
+4.2
+Now we will check whether the wage of female who are married on behalf of same education and experience.
+```{r}
+#$$wage=\beta_0+\beta_1*educ+\beta_2*exper+\beta_3*female+\beta_4*married+\epsilon$$
+#Female Variable:-
+#male=0 and female=1
+#Married variable:-
+#married=1 and unmarried=0
+
+#Unmarried male
+#$$wage=\beta_0+\beta_1*educ+\beta_2*exper+\epsilon$$
+#Married Male:-
+#$$wage=(\beta_0+\beta_4)+\beta_1*educ+\beta_2*exper+\epsilon$$
+#Unmarried Female
+#$$wage=(\beta_0+\beta_3)+\beta_1*educ+\beta_2*exper+\epsilon$$
+#Married Female
+#$$wage=(\beta_0+\beta_3+\beta_4)+\beta_1*educ+\beta_2*exper+\epsilon$$
+ML=lm(wage~educ+exper+female,data=wage1)
+summary(ML)
+#Interpretation
+#We can observe that the estimate of female is (-2.15552) which is highly significant to the model and negative in nature that shows our beta_3 is negative.
+#It is concluded that wage of female is less than wage of male.
+# Calculated wage of Male
+#$$\hat{wage}=-1.73448+0.6025*educ+0.06424*exper$$
+### Calculated wage of female
+#$$\hat{wage}=-1.73448+0.6025*educ+0.06424*exper-2.15552$$
+#$$\hat{wage}=-3.8899+0.6025*educ+0.06424*exper$$
+### Wage function with married variable
+#$$wage=\beta_0+\beta_1*educ+\beta_2*exper+\beta_3*married+\epsilon$$
+M5=lm(wage~educ+exper+married,data=wage1)
+summary(M5)
+#Interpratation:-
+#We can see that the married variable is significant to the model and the coefficient of married is positive in nature.
+# Wage Function with both variable
+#$$wage=\beta_0+\beta_1*educ+\beta_2*exper+\beta_3*female+\beta_4*married+\epsilon$$
+M6=lm(wage~educ+exper+married+female,data=wage1)
+summary(M6)
+#Unmarried Male
+#$$wage=\beta_0+\beta_1*educ+\beta_2*exper+\epsilon$$
+#$$wage=-1.79066+0.58332*educ+0.05567*exper$$
+#Married Male
+#$$wage=-1.79066+0.58332*educ+0.05567*exper+0.66024$$
+#$$wage=-1.13042+0.58332*educ+0.05567*exper$$
+#Unmarried Female
+#$$wage=-1.79066+0.58332*educ+0.05567*exper-2.06710$$
+#$$wage=-3.85776+0.58332*educ+0.05567*exper$$
+#Married Female
+#$$wage=-1.79066+0.58332*educ+0.05567*exper+0.66024-2.06710$$
+#$$wage=-3.19752+0.58332*educ+0.05567*exper$$
+#Conclusion:-
+#1- From the above analysis we can observe that at the same level of education and experience,the wage of unmarried male is less than wage of married male
+#2- On the same level of education and experience the wage of married female is less than unmarried male.
+#3- Wage of married female is less than wage of unmarried male and we can also see the sequence of wage's could be:
+#unmarried female<married female<unmarried male<married male
+```
+5- TWO WAY ANOVA
+Check whether three methods and analysts have significance difference on output value or not.
+```{r}
+#Our Hypothesis will be
+#H_0:All the methods are same
+#vs
+#H_1: Atleast one of the method is different from others.
+#and
+#H_0:All the analysts are same
+#vs
+#H_1:Atleast one of the analysts is different from others.
+M=data.frame(Methods=c('M1','M1','M1','M1','M1','M2','M2','M2','M2','M2','M3','M3','M3','M3','M3'),Analysts=c('A1','A2','A3','A4','A5','A1','A2','A3','A4','A5','A1','A2','A3','A4','A5'),Values=c(7.5,7.4,7.3,7.6,7.4,7,7.2,7,7.2,7.2,7.1,6.7,6.9,6.8,6.9))
+M2=aov(Values~Methods+Analysts,data=M)
+summary(M2)
+#N
+TukeyHSD(M2)
+#Conclusion
+#1- From the above analysis it is clear that there is significant difference between different methods as the p_value is 0.000567
+#There is no significant difference betweem the analysts as the p_value is 0.666442
+#2- Though the difference between the different methods are different,we use TukeyHSD to know which method is significantly different.
+#3- From TukeyHSD is clear that Method (2,1) and Method (3,1) is significantly different while difference between the Method 2 and 3 are significantly equal i.e method 1 has different effect from Method 2 and 3
+```
+6- Ploting The Data
+
+```{r}
+library(astsa)
+data(jj)
+head(jj)
+#N
+plot(jj,type='o',ylab='Global Temperature Deviations')
+# Moving Average
+W=rnorm(500,1)
+V=filter(W,side=2,filter=rep(3,3))
+par(mfrow=c(2,1))
+plot.ts(W,main='White Noise')
+plot.ts(V,ylim=c(-3,3),main="Moving Average")
+#Conclusion
+#The white noise plot says that the process is stationary,as the white noise is change is significantly to the change of time.
+#By Moving average plot,it is clear that the process is stationary as the Moving average change significantly with time.
+```
+
+Bread Rise Experiment
+```{r}
+set.seed(7638)
+f=factor(rep(c(35,40,45),each=4))
+fac=sample(f,12)
+eu=1:12
+plan=data.frame(loaf=eu,time=fac)
+plan
+#N
+write.csv(plan,file="Plan.csv",row.names=FALSE)
+bread=read.csv("Plan.csv")
+bread
+#N
+rm(bread)
+#Analysis with daewr
+library(daewr)
+mod0=lm(height~time,data=bread)
+summary(mod0)
+#N
+summary.aov(mod0)
+#N
+names(mod0)
+#N
+mod0$contrasts
+#N
+model.matrix(mod0)
+#N
+mod01=lm(height~time,data=bread,contrasts=list("time"=contr.sum))
+summary(mod01)
+model.matrix(mod01)
+```
+
+Ethanol Fuel Experiment
+
+```{r}
+require(daewr)
+mod1=aov(CO~Eth*Ratio,data=COdata)
+summary(mod1)
+#Illustration of ANOVA
+names(COdata)
+#N
+mO=lm(CO~1,data=COdata)
+mE=lm(CO~1+Eth,data=COdata)
+mR=lm(CO~1+Eth+Ratio,data=COdata)
+mER=lm(CO~1+Eth+Ratio+Eth:Ratio,data=COdata)
+SSEth=deviance(mO)-deviance(mE)
+dfEth=df.residual(mO)-df.residual(mE)
+c(dfEth,SSEth)
+#N
+SSRatio=deviance(mE)-deviance(mR)
+dfRatio=df.residual(mE)-df.residual(mR)
+c(dfRatio,SSRatio)
+#N
+SSER=deviance(mR)-deviance(mER)
+dfER=df.residual(mR)-df.residual(mER)
+c(dfER,SSER)
+#N
+SSresid=deviance(mER)
+dfResid=df.residual(mER)
+c(dfResid,SSresid)
+#Summary of means
+model.tables(mod1,type="means")
+#plot of means
+plot.design(COdata,main="plot of means")
+#Interaction plot
+with(COdata,(interaction.plot(Eth,Ratio,CO,type='b',pch=c(18,24,22),leg.bty = 'o',main="Interaction Plot")))
+#When ratio is on X axis
+with(COdata,(interaction.plot(Ratio,Eth,CO,type='b',pch=c(18,24,22),leg.bty = 'o',main="Interaction Plot")))
+
+```
+
+VOLT Experiment
+
+```{r}
+require(daewr)
+require(FrF2)
+modv=lm(y~A*B*C,data=volt,contrast=list(A=contr.FrF2,B=contr.FrF2,C=contr.FrF2))
+summary(modv)
+#N
+summary.aov(modv)
+#N
+MEplot(modv)
+#N
+IAPlot(modv)
+#N
+model.matrix(modv)
+#N
+names(modv)
+#N
+modv$contrasts
+```
+
+CHEM DATA
+
+```{r}
+modf=lm(y~A*B*C*D,data=daewr::chem)
+summary(modf)
+#N
+summary.aov(modf)
+#N
+modf1=lm(y~(A+B+C+D^2,data=daewr::chem)
+summary(modf1)
+#N
+summary.aov(modf1)
+```
+
+#Creation of RCBD using R
+
+```{r}
+f=factor(c(1,2,3,4))
+b1t=sample(f,4)
+b2t=sample(f,4)
+b3t=sample(f,4)
+b4t=sample(f,4)
+t=c(b1t,b2t,b3t,b4t)
+block=factor(rep(c('A','B','C','D'),each=4))
+flnum=rep(f,4)
+plan=data.frame(TOF=block,FN=flnum,treatment=t)
+plan
+```
+
+#Design using Agricolae
+
+```{r}
+require(agricolae)
+treat=c(1,2,3,4)
+od=design.rcbd(treat,4,seed=11)
+rcb=od$book
+levels(rcb$block)=c('A','B','C','D')
+rcb
+#N
+xtabs(plots~block+treat,data=rcb)
+```
+
+#Rat Behaviour Experiment
+
+```{r}
+require(daewr)
+head(drug)
+tail(drug)
+#N
+tail(drug)
+#N
+table1=xtabs(rate~rat+dose,data=drug)
+table1
+#N
+mod1=aov(rate~rat+dose,data=drug)
+summary(mod1)
+#N
+contrasts(drug$dose)=contr.poly(5)
+mod2=aov(rate~rat+dose,data=drug)
+summary.aov(mod2,split=list(dose("Linear"=1,"Quadratic"=2,"Cibic"=3,"Quadratic"=4)))
+#N
+y=apply(table1,2,mean)
+y
+#N
+x=as.double(levels(drug$dose))
+x
+#N
+plot(x,y)
+rate.quad=lm(y~poly(x,2))
+lines(xx,predict(rate.quad,data.frame(x=xx)),lwd=2)
+```
+
+#Dish Washing experiment
+
+```{r}
+require(DoE.base)
+y=c(0,0,12,14,1,0,1,11,10,2,33,24,3,5,41,70)
+Bdish=add.response(Bdish,response = y)
+dish=lm(y~Blocks+A*B*C*D,data=Bdish)
+summary(dish)
+#Half normal plot
+effects=coef(dish)
+effects=effects[5:19]
+effects=effects[~is.na(effects)]
+library(daewr)
+halfnormal(effects,names(effects),alpha=o.25)
+```
+
